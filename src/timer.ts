@@ -78,6 +78,12 @@ export class ReminderTimer {
     if (this._state === 'due') this.arm(this.intervalMs);
   }
 
+  /** Move a running countdown so that it ends at `dueAt` (used to keep several windows in step). */
+  startAt(dueAt: number, minDelayMs = 1000): void {
+    if (this._state !== 'running') return;
+    this.arm(Math.min(Math.max(minDelayMs, dueAt - this.clock.now()), this.intervalMs));
+  }
+
   /** Apply a new interval; a running countdown restarts with it. */
   setInterval(intervalMs: number): void {
     if (intervalMs === this.intervalMs) return;

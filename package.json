@@ -1,94 +1,377 @@
 {
   "name": "hydrate-reminder-animated",
   "displayName": "Hydrate: Animated Water Reminder",
-  "description": "A cute animated animal friend visits your editor to remind you to drink water.",
-  "version": "0.2.0",
+  "description": "A cute animated animal friend visits your editor to remind you to drink water, with 3D-style characters, sounds and system notifications.",
+  "version": "0.3.0",
   "publisher": "deepugnair",
-  "author": { "name": "Deepu G Nair" },
+  "author": {
+    "name": "Deepu G Nair"
+  },
   "license": "MIT",
   "icon": "icon.png",
-  "galleryBanner": { "color": "#BFE9FF", "theme": "light" },
-  "engines": { "vscode": "^1.85.0" },
-  "categories": ["Other"],
-  "keywords": ["water", "reminder", "hydration", "break", "pet"],
+  "galleryBanner": {
+    "color": "#BFE9FF",
+    "theme": "light"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "water",
+    "reminder",
+    "hydration",
+    "break",
+    "pet",
+    "animated",
+    "health"
+  ],
   "main": "./out/extension.js",
-  "activationEvents": ["onStartupFinished"],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
   "contributes": {
     "commands": [
-      { "command": "waterReminder.start", "title": "Water Reminder: Start" },
-      { "command": "waterReminder.pause", "title": "Water Reminder: Pause" },
-      { "command": "waterReminder.resume", "title": "Water Reminder: Resume" },
-      { "command": "waterReminder.reset", "title": "Water Reminder: Reset Timer" },
-      { "command": "waterReminder.test", "title": "Water Reminder: Test Reminder" },
-      { "command": "waterReminder.preview", "title": "Water Reminder: Preview Character" },
-      { "command": "waterReminder.changeCharacter", "title": "Water Reminder: Change Character" },
-      { "command": "waterReminder.changeAnimation", "title": "Water Reminder: Change Animation" },
-      { "command": "waterReminder.setInterval", "title": "Water Reminder: Set Interval" },
-      { "command": "waterReminder.openSettings", "title": "Water Reminder: Open Settings" },
-      { "command": "waterReminder.acknowledge", "title": "Water Reminder: I've Had a Drink!" },
-      { "command": "waterReminder.dismiss", "title": "Water Reminder: Dismiss" },
-      { "command": "waterReminder.menu", "title": "Water Reminder: Show Menu" }
+      {
+        "command": "waterReminder.start",
+        "title": "Water Reminder: Start"
+      },
+      {
+        "command": "waterReminder.pause",
+        "title": "Water Reminder: Pause"
+      },
+      {
+        "command": "waterReminder.resume",
+        "title": "Water Reminder: Resume"
+      },
+      {
+        "command": "waterReminder.reset",
+        "title": "Water Reminder: Reset Timer"
+      },
+      {
+        "command": "waterReminder.test",
+        "title": "Water Reminder: Test Reminder"
+      },
+      {
+        "command": "waterReminder.preview",
+        "title": "Water Reminder: Preview Character"
+      },
+      {
+        "command": "waterReminder.changeCharacter",
+        "title": "Water Reminder: Change Character"
+      },
+      {
+        "command": "waterReminder.changeAnimation",
+        "title": "Water Reminder: Change Animation"
+      },
+      {
+        "command": "waterReminder.changeSound",
+        "title": "Water Reminder: Change Sound"
+      },
+      {
+        "command": "waterReminder.setInterval",
+        "title": "Water Reminder: Set Interval"
+      },
+      {
+        "command": "waterReminder.openSettings",
+        "title": "Water Reminder: Open Settings"
+      },
+      {
+        "command": "waterReminder.acknowledge",
+        "title": "Water Reminder: I've Had a Drink!"
+      },
+      {
+        "command": "waterReminder.dismiss",
+        "title": "Water Reminder: Dismiss"
+      },
+      {
+        "command": "waterReminder.menu",
+        "title": "Water Reminder: Show Menu"
+      }
     ],
     "menus": {
       "commandPalette": [
-        { "command": "waterReminder.acknowledge", "when": "waterReminder.visible" },
-        { "command": "waterReminder.dismiss", "when": "waterReminder.visible" }
+        {
+          "command": "waterReminder.acknowledge",
+          "when": "waterReminder.visible"
+        },
+        {
+          "command": "waterReminder.dismiss",
+          "when": "waterReminder.visible"
+        }
       ]
     },
     "keybindings": [
-      { "command": "waterReminder.acknowledge", "key": "ctrl+alt+d", "when": "waterReminder.visible" },
-      { "command": "waterReminder.dismiss", "key": "ctrl+alt+x", "when": "waterReminder.visible" }
+      {
+        "command": "waterReminder.acknowledge",
+        "key": "ctrl+alt+d",
+        "when": "waterReminder.visible"
+      },
+      {
+        "command": "waterReminder.dismiss",
+        "key": "ctrl+alt+x",
+        "when": "waterReminder.visible"
+      }
     ],
     "configuration": {
       "title": "Animated Water Reminder",
       "properties": {
-        "waterReminder.enabled": { "type": "boolean", "default": true, "order": 0, "description": "Turn water reminders on or off." },
+        "waterReminder.enabled": {
+          "type": "boolean",
+          "default": true,
+          "order": 0,
+          "description": "Turn water reminders on or off."
+        },
         "waterReminder.intervalMinutes": {
-          "type": "number", "default": 30, "minimum": 1, "maximum": 1440, "order": 1,
+          "type": "number",
+          "default": 30,
+          "minimum": 1,
+          "maximum": 1440,
+          "order": 1,
           "markdownDescription": "Minutes between reminders. Common choices: 15, 30, 45, 60, 90. Any value from 1 to 1440 works. The next interval starts when a reminder ends."
         },
+        "waterReminder.autoClose": {
+          "type": "boolean",
+          "default": false,
+          "order": 2,
+          "markdownDescription": "Off (default): the character stays until you click **I've had a drink!** or **Dismiss**. On: it leaves by itself after `#waterReminder.displaySeconds#`."
+        },
         "waterReminder.displaySeconds": {
-          "type": "number", "default": 20, "minimum": 3, "maximum": 600, "order": 2,
-          "description": "How long the character waits for you before leaving on its own."
+          "type": "number",
+          "default": 20,
+          "minimum": 3,
+          "maximum": 600,
+          "order": 3,
+          "markdownDescription": "How long the character waits before leaving on its own. Only used when `#waterReminder.autoClose#` is on."
         },
         "waterReminder.character": {
-          "type": "string", "default": "elephant", "order": 3,
-          "enum": ["elephant", "cat", "dog", "rabbit", "panda", "bear"],
-          "enumItemLabels": ["Baby Elephant", "Cat", "Dog", "Rabbit", "Panda", "Bear"],
+          "type": "string",
+          "default": "elephant",
+          "order": 4,
+          "enum": [
+            "elephant",
+            "cat",
+            "dog",
+            "rabbit",
+            "panda",
+            "bear",
+            "fox",
+            "penguin",
+            "koala",
+            "tiger"
+          ],
+          "enumItemLabels": [
+            "Baby Elephant",
+            "Cat",
+            "Dog",
+            "Rabbit",
+            "Panda",
+            "Bear",
+            "Fox",
+            "Penguin",
+            "Koala",
+            "Tiger"
+          ],
           "description": "Which friend visits you."
         },
         "waterReminder.entryAnimation": {
-          "type": "string", "default": "slide", "order": 4,
-          "enum": ["walk", "slide", "bounce", "fall", "sprout"],
+          "type": "string",
+          "default": "random",
+          "order": 5,
+          "enum": [
+            "random",
+            "walk",
+            "slide",
+            "bounce",
+            "fall",
+            "sprout",
+            "roll",
+            "balloon",
+            "faraway",
+            "poof",
+            "peek"
+          ],
+          "enumItemLabels": [
+            "Random",
+            "Walk",
+            "Slide",
+            "Bounce",
+            "Fall",
+            "Sprout",
+            "Roll",
+            "Balloon",
+            "Faraway",
+            "Poof",
+            "Peek"
+          ],
           "enumDescriptions": [
+            "A different style every time, picked from the Random Pool. Choose any other value to always use that one style.",
             "Walks in from the left.",
-            "Slips in from the left, flails and recovers.",
+            "Slips in on a wet floor, flails and recovers.",
             "Bounces in from the left.",
             "Drops gently from above.",
-            "Comes up from the bottom, breaking through the ground like a sprouting tree."
+            "Comes up from the bottom, breaking through the ground like a sprouting tree.",
+            "Tumbles in curled up like a ball and pops up dizzy.",
+            "Floats down holding a balloon.",
+            "Runs in from far away, growing as it gets closer.",
+            "Appears in a puff of smoke with a spin.",
+            "Peeks round the edge twice, then hops in."
           ],
           "description": "How the character arrives."
         },
         "waterReminder.exitAnimation": {
-          "type": "string", "default": "slide", "order": 5,
-          "enum": ["auto", "walk", "slide", "bounce", "burrow"],
+          "type": "string",
+          "default": "auto",
+          "order": 6,
+          "enum": [
+            "auto",
+            "walk",
+            "slide",
+            "bounce",
+            "burrow",
+            "roll",
+            "float",
+            "faraway",
+            "poof"
+          ],
+          "enumItemLabels": [
+            "Automatic",
+            "Walk",
+            "Slide",
+            "Bounce",
+            "Burrow",
+            "Roll",
+            "Float",
+            "Faraway",
+            "Poof"
+          ],
           "enumDescriptions": [
-            "Leaves the way it came (sprout → burrows back down).",
-            "Turns around and walks away.",
+            "Leaves the way it came (sprout → burrow, balloon → float, and so on).",
+            "Waves, turns around and walks away.",
             "Slips and slides away backwards.",
-            "Bounces away.",
-            "Digs back into the ground."
+            "Waves, turns around and bounces away.",
+            "Digs back into the ground.",
+            "Curls up and rolls away.",
+            "Blows up a balloon and floats away.",
+            "Turns and runs off into the distance.",
+            "Spins and vanishes in a puff of smoke."
           ],
           "description": "How the character leaves."
         },
-        "waterReminder.size": { "type": "string", "default": "medium", "enum": ["small", "medium", "large"], "order": 6, "description": "Character size." },
-        "waterReminder.speed": { "type": "string", "default": "normal", "enum": ["slow", "normal", "fast"], "order": 7, "description": "Animation speed." },
+        "waterReminder.randomPool": {
+          "type": "array",
+          "order": 7,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": [
+              "walk",
+              "slide",
+              "bounce",
+              "fall",
+              "sprout",
+              "roll",
+              "balloon",
+              "faraway",
+              "poof",
+              "peek"
+            ]
+          },
+          "default": [
+            "walk",
+            "slide",
+            "bounce",
+            "fall",
+            "sprout",
+            "roll",
+            "balloon",
+            "faraway",
+            "poof",
+            "peek"
+          ],
+          "markdownDescription": "The styles that **Random** picks from. Remove any you do not want to see."
+        },
+        "waterReminder.size": {
+          "type": "string",
+          "default": "medium",
+          "enum": [
+            "small",
+            "medium",
+            "large"
+          ],
+          "order": 8,
+          "description": "Character size."
+        },
+        "waterReminder.speed": {
+          "type": "string",
+          "default": "normal",
+          "enum": [
+            "slow",
+            "normal",
+            "fast"
+          ],
+          "order": 9,
+          "description": "Animation speed."
+        },
         "waterReminder.messages": {
-          "type": "array", "items": { "type": "string", "maxLength": 120 }, "default": [], "order": 8,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "default": [],
+          "order": 10,
           "markdownDescription": "Your own reminder messages; one is picked at random each time. Leave empty to use the built-in messages."
         },
+        "waterReminder.sound": {
+          "type": "boolean",
+          "default": true,
+          "order": 11,
+          "description": "Play a short sound when the character arrives and when it leaves."
+        },
+        "waterReminder.soundStyle": {
+          "type": "string",
+          "default": "warm",
+          "order": 12,
+          "enum": [
+            "modern",
+            "elegant",
+            "warm",
+            "water",
+            "minimal"
+          ],
+          "enumItemLabels": [
+            "Modern",
+            "Elegant",
+            "Warm",
+            "Water",
+            "Minimal"
+          ],
+          "enumDescriptions": [
+            "A soft, glassy two-note chime.",
+            "A gentle strummed chord, like a celesta or harp.",
+            "Two notes on a wooden marimba.",
+            "Two water droplets.",
+            "One soft, short tap."
+          ],
+          "markdownDescription": "Which sound is played. Run **Water Reminder: Change Sound** to hear each one."
+        },
+        "waterReminder.systemNotification": {
+          "type": "boolean",
+          "default": true,
+          "order": 13,
+          "description": "When a reminder is due while you are working in another application, also send a system notification."
+        },
         "waterReminder.renderMode": {
-          "type": "string", "default": "floating", "enum": ["floating", "inline"], "order": 9,
+          "type": "string",
+          "default": "floating",
+          "enum": [
+            "floating",
+            "inline"
+          ],
+          "order": 14,
           "enumDescriptions": [
             "Bottom-left corner of the editor, over the code.",
             "After the end of the last visible line. Use this if 'floating' ever stops working after a VS Code update."
@@ -109,5 +392,14 @@
     "@types/vscode": "^1.85.0",
     "@vscode/vsce": "^3.0.0",
     "typescript": "^5.4.0"
+  },
+  "extensionKind": [
+    "ui"
+  ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": true
+    },
+    "virtualWorkspaces": true
   }
 }

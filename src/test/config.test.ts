@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import * as assert from 'node:assert/strict';
 import { ACK_MESSAGES, pickAckMessage, DEFAULT_MESSAGES, DEFAULTS, formatRemaining, MAX_MESSAGE_LENGTH, normalize, pickMessage } from '../config';
+import { ENTRIES } from '../render/animations';
 import { wrap } from '../render/stage';
 
 test('empty input yields defaults', () => {
@@ -74,10 +75,33 @@ test('all 20 messages come up when picking at random', () => {
   assert.equal(seen.size, 20);
 });
 
-test('defaults: elephant that slides in and slides out', () => {
+test('defaults: elephant, random style, stays until answered, sound and notifications on', () => {
   assert.equal(DEFAULTS.character, 'elephant');
-  assert.equal(DEFAULTS.entryAnimation, 'slide');
-  assert.equal(DEFAULTS.exitAnimation, 'slide');
+  assert.equal(DEFAULTS.entryAnimation, 'random');
+  assert.equal(DEFAULTS.exitAnimation, 'auto');
+  assert.equal(DEFAULTS.autoClose, false);
+  assert.equal(DEFAULTS.sound, true);
+  assert.equal(DEFAULTS.systemNotification, true);
+  assert.deepEqual(DEFAULTS.randomPool, [...ENTRIES]);
+});
+
+test('a single style can be chosen instead of random', () => {
+  const s = normalize({ entryAnimation: 'slide', exitAnimation: 'slide' });
+  assert.equal(s.entryAnimation, 'slide');
+  assert.equal(s.exitAnimation, 'slide');
+});
+
+test('random pool is cleaned; an empty or invalid pool means every style', () => {
+  assert.deepEqual(normalize({ randomPool: ['roll', 'poof', 'roll', 'teleport', 7] }).randomPool, ['roll', 'poof']);
+  assert.deepEqual(normalize({ randomPool: [] }).randomPool, [...ENTRIES]);
+  assert.deepEqual(normalize({ randomPool: 'roll' }).randomPool, [...ENTRIES]);
+});
+
+test('auto close, sound and notification switches are read as booleans only', () => {
+  const s = normalize({ autoClose: true, sound: false, systemNotification: false });
+  assert.deepEqual([s.autoClose, s.sound, s.systemNotification], [true, false, false]);
+  const bad = normalize({ autoClose: 'yes', sound: 0, systemNotification: null });
+  assert.deepEqual([bad.autoClose, bad.sound, bad.systemNotification], [false, true, true]);
 });
 
 test('celebration messages are distinct, fit the bubble and are picked at random without repeats', () => {
@@ -95,4 +119,19 @@ test('celebration messages are distinct, fit the bubble and are picked at random
     seen.add(prev = next);
   }
   assert.equal(seen.size, ACK_MESSAGES.length);
+});
+
+test('sound style: warm by default, invalid values fall back', () => {
+  assert.equal(DEFAULTS.soundStyle, 'warm');
+  assert.equal(normalize({ soundStyle: 'water' }).soundStyle, 'water');
+  assert.equal(normalize({ soundStyle: 'retro' }).soundStyle, 'warm');
+});
+
+test('every sound style has both sound files', () => {
+  const fs = require('node:fs'), path = require('node:path');
+  for (const style of ['modern', 'elegant', 'warm', 'water', 'minimal']) for (const dir of ['in', 'out']) {
+    const file = path.join(__dirname, '..', '..', 'media', `${style}-${dir}.wav`);
+    assert.ok(fs.statSync(file).size > 10_000, `${style}-${dir}.wav is missing or empty`);
+    assert.equal(fs.readFileSync(file).subarray(0, 4).toString(), 'RIFF');
+  }
 });

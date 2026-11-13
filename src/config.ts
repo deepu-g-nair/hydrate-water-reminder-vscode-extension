@@ -1,19 +1,28 @@
 /** Settings model + validation (pure: no VS Code imports). */
 import { CHARACTERS, DEFAULT_CHARACTER } from './characters';
-import { ENTRIES, Entry, EXITS, ExitSetting, Size, Speed } from './render/animations';
+import { ENTRIES, Entry, ENTRY_SETTINGS, EntrySetting, EXITS, ExitSetting, Size, Speed } from './render/animations';
 
 export type RenderMode = 'floating' | 'inline';
+export type SoundStyle = 'modern' | 'elegant' | 'warm' | 'water' | 'minimal';
+export const SOUND_STYLES: readonly SoundStyle[] = ['modern', 'elegant', 'warm', 'water', 'minimal'];
 
 export interface Settings {
   enabled: boolean;
   intervalMinutes: number;
+  /** false: the character stays until the user answers. true: it leaves after displaySeconds. */
+  autoClose: boolean;
   displaySeconds: number;
   character: string;
-  entryAnimation: Entry;
+  /** 'random' picks a different style from randomPool each time. */
+  entryAnimation: EntrySetting;
   exitAnimation: ExitSetting;
+  randomPool: Entry[];
   size: Size;
   speed: Speed;
   messages: string[];
+  sound: boolean;
+  soundStyle: SoundStyle;
+  systemNotification: boolean;
   renderMode: RenderMode;
 }
 
@@ -65,8 +74,9 @@ export const MAX_MESSAGE_LENGTH = 90;
 export const INTERVAL_PRESETS: readonly number[] = [15, 30, 45, 60, 90];
 
 export const DEFAULTS: Settings = {
-  enabled: true, intervalMinutes: 30, displaySeconds: 20, character: DEFAULT_CHARACTER,
-  entryAnimation: 'slide', exitAnimation: 'slide', size: 'medium', speed: 'normal', messages: [], renderMode: 'floating',
+  enabled: true, intervalMinutes: 30, autoClose: false, displaySeconds: 20, character: DEFAULT_CHARACTER,
+  entryAnimation: 'random', exitAnimation: 'auto', randomPool: [...ENTRIES],
+  size: 'medium', speed: 'normal', messages: [], sound: true, soundStyle: 'warm', systemNotification: true, renderMode: 'floating',
 };
 
 export const SETTING_KEYS = Object.keys(DEFAULTS) as (keyof Settings)[];
@@ -77,21 +87,31 @@ const oneOf = <T extends string>(v: unknown, allowed: readonly T[], fallback: T)
 const num = (v: unknown, min: number, max: number, fallback: number): number =>
   typeof v === 'number' && Number.isFinite(v) ? Math.min(max, Math.max(min, v)) : fallback;
 
+const bool = (v: unknown, fallback: boolean): boolean => (typeof v === 'boolean' ? v : fallback);
+
 /** Turn whatever is in settings.json into safe values. Never throws. */
 export function normalize(raw: Partial<Record<keyof Settings, unknown>>): Settings {
   const messages = Array.isArray(raw.messages)
     ? raw.messages.filter((m): m is string => typeof m === 'string').map((m) => m.trim()).filter((m) => m.length > 0).map((m) => m.slice(0, 120))
     : [];
+  const pool = Array.isArray(raw.randomPool)
+    ? [...new Set(raw.randomPool.filter((e): e is Entry => typeof e === 'string' && (ENTRIES as readonly string[]).includes(e)))]
+    : [];
   return {
-    enabled: typeof raw.enabled === 'boolean' ? raw.enabled : DEFAULTS.enabled,
+    enabled: bool(raw.enabled, DEFAULTS.enabled),
     intervalMinutes: num(raw.intervalMinutes, 1, 24 * 60, DEFAULTS.intervalMinutes),
+    autoClose: bool(raw.autoClose, DEFAULTS.autoClose),
     displaySeconds: num(raw.displaySeconds, 3, 600, DEFAULTS.displaySeconds),
     character: oneOf(raw.character, CHARACTERS.map((c) => c.id), DEFAULTS.character),
-    entryAnimation: oneOf(raw.entryAnimation, ENTRIES, DEFAULTS.entryAnimation),
+    entryAnimation: oneOf(raw.entryAnimation, ENTRY_SETTINGS, DEFAULTS.entryAnimation),
     exitAnimation: oneOf(raw.exitAnimation, EXITS, DEFAULTS.exitAnimation),
+    randomPool: pool.length ? pool : [...ENTRIES],
     size: oneOf<Size>(raw.size, ['small', 'medium', 'large'], DEFAULTS.size),
     speed: oneOf<Speed>(raw.speed, ['slow', 'normal', 'fast'], DEFAULTS.speed),
     messages,
+    sound: bool(raw.sound, DEFAULTS.sound),
+    soundStyle: oneOf(raw.soundStyle, SOUND_STYLES, DEFAULTS.soundStyle),
+    systemNotification: bool(raw.systemNotification, DEFAULTS.systemNotification),
     renderMode: oneOf<RenderMode>(raw.renderMode, ['floating', 'inline'], DEFAULTS.renderMode),
   };
 }

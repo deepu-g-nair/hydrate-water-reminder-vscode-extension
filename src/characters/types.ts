@@ -6,18 +6,22 @@ export interface CharacterDef {
   skin: string;
   /** Darker shade: outlines, far-side limbs. */
   shade: string;
-  /** Arm and leg colour (defaults to skin / shade). */
+  /** Arm colour (defaults to skin / shade). */
   limb?: string;
   limbShade?: string;
+  /** Leg colour (defaults to limbShade). */
+  leg?: string;
   /** Dungarees colour. */
   outfit: string;
   outfitLight: string;
-  /** Drawn behind the head circle. */
+  /** Drawn behind the head circle. Sits on the "back" depth layer. */
   ears: string;
   /** Drawn on top of the head circle (floppy ears etc.). */
   earsFront?: string;
   /** Drawn behind the body. */
   tail?: string;
-  /** Facial features drawn on the head circle. */
+  /** Drawn on the torso, under the dungarees (belly patch etc.). */
+  belly?: string;
+  /** Facial features drawn on the head circle. Sits on the "front" depth layer. */
   face(happy: boolean): string;
 }

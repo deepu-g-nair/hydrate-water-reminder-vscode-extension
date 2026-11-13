@@ -2,17 +2,20 @@
 
 A little animal friend visits your editor to remind you to drink water.
 
-Instead of a plain notification, a cute character walks, bounces, slips or sprouts out of the ground right inside your code editor, holds up a glass of water, and waits for you to take a sip. You can keep typing the whole time.
+Instead of a plain notification, a cute 3D-style character rolls, floats, bounces or sprouts out of the ground right inside your code editor, holds up a glass of water, and waits until you have had a sip. You can keep typing the whole time.
 
 ## Features
 
-- **Six friends:** Baby Elephant, Cat, Dog, Rabbit, Panda and Bear.
-- **Five ways to arrive:** walk in, slip in on a wet floor, bounce in, drop from above, or sprout from the ground like a little tree.
-- **Lively reactions:** a happy dance and a different cheerful message each time you have had your drink.
-- **20 built-in messages**, some friendly, some a bit sarcastic. Or write your own.
-- **Your schedule:** remind every 15, 30, 45, 60 or 90 minutes, or any interval you like.
-- **Stays out of your way:** clicks pass straight through the character to your code, and it leaves by itself if you are busy.
-- **Light on resources:** no extra windows or background apps.
+- **Ten friends:** Baby Elephant, Cat, Dog, Rabbit, Panda, Bear, Fox, Penguin, Koala and Tiger.
+- **3D-style look:** soft shading, ground shadows, and characters that turn their heads and move in depth.
+- **Ten ways to arrive:** walk, slip on a wet floor, bounce, drop from above, sprout from the ground, roll in like a ball, float down with a balloon, run in from far away, appear in a puff of smoke, or peek round the edge first.
+- **A surprise every time:** by default a different style is picked for each reminder. Prefer one? Choose it and it stays.
+- **It waits for you:** the character stays until you click **I've had a drink!**, and gives a little wave or twirl now and then so you do not forget it.
+- **Sound:** a soft chime when it arrives and when it leaves, in five styles: Modern, Elegant, Warm, Water and Minimal.
+- **Reaches you outside VS Code:** if you are working in another application when a reminder is due, you also get a system notification.
+- **Friendly messages:** 20 reminders and 15 cheers, some of them a bit sarcastic. Or write your own.
+- **Your schedule:** every 15, 30, 45, 60 or 90 minutes, or any interval you like.
+- **Stays out of your way:** clicks pass straight through the character to your code.
 
 ## Getting started
 
@@ -27,8 +30,7 @@ To see your friend right away:
 When the character appears:
 
 - Click **💧 I've had a drink!** in the status bar (or press `Ctrl+Alt+D`) once you have had some water.
-- Click **✕ Dismiss** (or press `Ctrl+Alt+X`) to send it away.
-- Or do nothing, and it leaves on its own after a short while.
+- Click **✕ Dismiss** (or press `Ctrl+Alt+X`) to send it away without drinking.
 
 ## Make it yours
 
@@ -37,7 +39,8 @@ Click the **💧** item in the status bar for a quick menu, or use these command
 | Command | What it does |
 |---|---|
 | Water Reminder: Change Character | Choose your friend |
-| Water Reminder: Change Animation | Choose how it arrives and leaves |
+| Water Reminder: Change Animation | Choose "Surprise me", or one style for arriving and leaving |
+| Water Reminder: Change Sound | Hear and pick one of five sound styles, or turn sound off |
 | Water Reminder: Set Interval | Choose how often you are reminded |
 | Water Reminder: Preview Character | Try a character and animation without saving |
 | Water Reminder: Test Reminder | Show a reminder now |
@@ -54,14 +57,23 @@ Search for "Water Reminder" in Settings.
 |---|---|---|
 | Enabled | Reminders on or off | On |
 | Interval Minutes | Minutes between reminders (1 to 1440) | 30 |
-| Display Seconds | How long the character waits for you | 20 |
-| Character | Elephant, Cat, Dog, Rabbit, Panda or Bear | Elephant |
-| Entry Animation | Walk, Slide, Bounce, Fall or Sprout | Slide |
-| Exit Animation | Automatic, Walk, Slide, Bounce or Burrow | Slide |
+| Auto Close | Off: the character stays until you answer. On: it leaves by itself | Off |
+| Display Seconds | How long it waits when Auto Close is on | 20 |
+| Character | One of the ten friends | Elephant |
+| Entry Animation | Random, or one of the ten styles | Random |
+| Exit Animation | Automatic (leaves the way it came), or one fixed style | Automatic |
+| Random Pool | Which styles Random may pick from | All ten |
 | Size | Small, Medium or Large | Medium |
 | Speed | Slow, Normal or Fast | Normal |
 | Messages | Your own reminder messages | Built-in messages |
+| Sound | Chime when the character arrives and leaves | On |
+| Sound Style | Modern, Elegant, Warm, Water or Minimal | Warm |
+| System Notification | Notify you when you are in another application | On |
 | Render Mode | Floating or Inline (see Troubleshooting) | Floating |
+
+### Always use one animation
+
+Run **Water Reminder: Change Animation** and pick any style other than "Surprise me". To get the surprises back, pick "Surprise me" again.
 
 ### Custom messages
 
@@ -76,11 +88,13 @@ Add your own lines in `settings.json`. One is picked at random each time. Keep e
 
 ## Good to know
 
-- The next countdown starts when a reminder ends, so reminders never pile up, even after your computer has been asleep.
+- The next countdown starts when you answer a reminder, so reminders never pile up, even after your computer has been asleep.
 - The countdown continues after you reload the window.
 - The character needs an open text file to appear in. If none is open, it waits and shows up when you are back in one.
 - The character cannot be clicked. Use the status bar buttons or the keyboard shortcuts.
-- With several VS Code windows open, only the one you are working in shows the reminder.
+- **Several VS Code windows:** you get one reminder, in the window you are working in. Answer it once and every window starts its next countdown together. Pause, Resume and Reset apply to all open windows.
+- **System notifications** come from your operating system, so they follow its rules: they are hidden while Do Not Disturb or Focus is on. On Windows the notification is labelled "Windows PowerShell", and on macOS "Script Editor", because those built-in tools are used to send it.
+- The "3D" is a look (shading, shadows and depth), drawn as a flat picture inside the editor. It is not a 3D model.
 
 ## Troubleshooting
 
@@ -89,6 +103,15 @@ Change **Render Mode** to **Inline** in Settings. The character then stands at t
 
 **No reminders are showing.**
 Check that the status bar shows a countdown and not "off" or "paused". Run **Water Reminder: Start** to turn reminders back on.
+
+**No sound.**
+Check your system volume and that **Sound** is on in Settings. Sound uses a player that comes with your operating system (PowerShell on Windows, `afplay` on macOS, `paplay` or `aplay` on Linux). On a locked-down work computer these may be blocked; the reminder itself still works.
+
+**No system notification.**
+Notifications only appear when no VS Code window is in front. Check that notifications are allowed in your operating system settings and that Do Not Disturb is off. On Linux, `notify-send` must be installed.
+
+**I do not want sound or system notifications.**
+Turn off **Sound** or **System Notification** in Settings.
 
 ## License
 

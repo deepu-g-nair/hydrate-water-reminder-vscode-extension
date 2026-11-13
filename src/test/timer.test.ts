@@ -193,3 +193,26 @@ test('onChange reports every state transition', () => {
   timer.stop();
   assert.deepEqual(states, ['running', 'due', 'running', 'paused', 'running', 'stopped']);
 });
+
+test('startAt moves a running countdown to a shared due time', () => {
+  const { clock, timer, due } = make();
+  timer.start(30 * MIN);
+  clock.advance(5 * MIN);
+  timer.startAt(clock.now() + 20 * MIN);
+  assert.equal(timer.remainingMs(), 20 * MIN);
+  assert.equal(clock.timers.size, 1);
+  clock.advance(20 * MIN);
+  assert.equal(due(), 1);
+});
+
+test('startAt never fires instantly, never exceeds the interval, and ignores a paused timer', () => {
+  const { clock, timer } = make();
+  timer.start(30 * MIN);
+  timer.startAt(clock.now() - 5 * MIN);
+  assert.equal(timer.remainingMs(), 1000);
+  timer.startAt(clock.now() + 500 * MIN);
+  assert.equal(timer.remainingMs(), 30 * MIN);
+  timer.pause();
+  timer.startAt(clock.now() + MIN);
+  assert.equal(timer.state, 'paused');
+});

@@ -1,116 +1,76 @@
-# Animated Water Reminder — development notes
-
-A little animal friend walks into your VS Code editor, or sprouts out of the ground, to remind you to drink water. It lives inside the text editor itself: no separate app, no extra window.
-
-## Quick start (no build needed)
-
-1. Open this folder in VS Code (the folder that contains `package.json`).
-2. Press **F5**. A second window opens, titled **[Extension Development Host]**.
-3. In that second window, open any code file.
-4. Press `Ctrl+Shift+P` (Mac: `Cmd+Shift+P`) and run **Water Reminder: Test Reminder**.
-5. Click **💧 I've had a drink!** in the status bar, or **✕ Dismiss**.
-
-To see the ground-breaking entry: run **Water Reminder: Change Animation** and pick **Sprout from the bottom**.
-
-## Commands
-
-| Command | What it does |
-|---|---|
-| Water Reminder: Start / Pause / Resume / Reset Timer | Control the countdown |
-| Water Reminder: Set Interval | 15, 30, 45, 60, 90 minutes, or any custom value |
-| Water Reminder: Test Reminder | Show a reminder now with your current settings |
-| Water Reminder: Preview Character | Try any character and animation without saving |
-| Water Reminder: Change Character | Pick and save a character |
-| Water Reminder: Change Animation | Pick and save how it arrives and leaves |
-| Water Reminder: Open Settings | All settings in one place |
-
-The **💧 24m** item at the right of the status bar shows the time left; click it for a menu.
-While the character is visible: `Ctrl+Alt+D` = "I've had a drink!", `Ctrl+Alt+X` = dismiss.
-
-## Settings (`waterReminder.*`)
-
-| Setting | Values | Default |
-|---|---|---|
-| `enabled` | on / off | on |
-| `intervalMinutes` | 1 – 1440 | 30 |
-| `displaySeconds` | 3 – 600: how long it waits for you | 20 |
-| `character` | elephant, cat, dog, rabbit, panda, bear | elephant |
-| `entryAnimation` | walk, slide, bounce, fall, sprout | walk |
-| `exitAnimation` | auto, walk, slide, bounce, burrow | auto |
-| `size` | small, medium, large | medium |
-| `speed` | slow, normal, fast | normal |
-| `messages` | your own list of messages (empty = the 20 built-in ones; keep each under 90 characters) | empty |
-| `renderMode` | floating, inline | floating |
-
-## How the timer behaves
-
-- The next interval starts when a reminder **ends** (acknowledged, dismissed, or timed out).
-- After sleep or a long pause you get one reminder, never a pile of them.
-- The countdown survives a window reload. Pause stays paused.
-- If no text file is open, or VS Code is in the background, the reminder waits and appears as soon as you are back in a text editor.
-- Changing the interval restarts the countdown.
-
-## Known limits
-
-- The character cannot be clicked; use the status bar buttons or shortcuts.
-- It needs an open text editor to appear in.
-- It always uses the bottom-left corner and leaves by the left or into the ground.
-- With several VS Code windows open, each window keeps its own countdown; only the focused one shows a reminder.
-- `floating` mode relies on VS Code behaviour that is not formally documented. If it ever stops working after an update, switch `renderMode` to `inline`.
-
-Details: `FEASIBILITY.md` (written for Phase 1; the "enter from right" option it mentions has since been removed).
+# Development notes
 
 ## Build, test, package
 
-Needs [Node.js](https://nodejs.org) 20 or newer.
+Needs [Node.js](https://nodejs.org) 20 or newer (22.12+ avoids a known problem with the packaging tool).
 
 ```
 npm install
 npm test          # compiles, then runs the unit tests
-npm run package   # creates animated-water-reminder-0.1.0.vsix
+npm run package   # creates the .vsix
 ```
 
-Install the `.vsix`: Extensions view → `…` menu → **Install from VSIX…**
+To try it without building: open the folder in VS Code and press **F5** (`out/` is pre-built).
 
-The author is set to **Deepu G Nair**. The `publisher` field is `deepu-g-nair` because VS Code publisher IDs cannot contain spaces; before publishing to the Marketplace, make sure it matches the publisher ID you create there.
+## How it works
+
+- The character is one `TextEditorDecorationType` whose `after` attachment is an SVG image. All motion is CSS animation inside that SVG, so the extension does no per-frame work.
+- Each phase is a separate SVG: `enter` (arrive + idle), `wait` (a short nudge, then still), `ack` / `dismiss` (leave).
+- Nothing animates forever. After arriving, the character idles for about 30 seconds, then becomes a still picture and plays a short nudge every 30 seconds. A still picture costs almost nothing.
+- The 3D look is made in `render/stage.ts`: every flat fill becomes a lit gradient (`shade3d`), there is a ground shadow that reacts to height, the head has back/front depth layers that slide when it looks around, and some styles move in depth. Real 3D transforms are not available for SVG drawn as an image, so this is a look, not a model.
+- Sound and system notifications have no VS Code API. `os.ts` runs tools that ship with the operating system. Text from settings is passed as an environment variable or a separate argument, never inside a command.
+- `shared.ts` keeps several windows in step through a few tiny files in the extension's global storage folder.
+- `migrate.ts` resets every saved setting once, the first time 0.3.0 runs. To force another reset in a later release, change `SETTINGS_RESET_VERSION`; otherwise leave it alone.
+
+## Project layout
+
+```
+src/extension.ts          commands, settings, status bar, timer + multi-window wiring
+src/timer.ts              countdown logic (no VS Code dependency)
+src/config.ts             settings validation, messages
+src/presenter.ts          puts the character in the editor (decorations), nudges
+src/os.ts                 sound and system notification commands
+src/shared.ts             coordination between VS Code windows
+src/render/stage.ts       animation engine: builds the self-animating SVG
+src/render/animations.ts  style names, durations, speed and size tables
+src/characters/           one file per animal + shared body rig
+src/test/                 unit tests (node:test)
+src/migrate.ts            one-time reset of saved settings (0.3.0)
+media/<style>-in.wav      generated sounds: modern, elegant, warm, water, minimal
+media/<style>-out.wav
+tools/make-sounds.py      regenerates the sounds (needs numpy and scipy)
+```
+
+## Adding a character
+
+1. Copy `src/characters/bear.ts` to `src/characters/owl.ts` and edit the colours, ears and face. Use flat `fill="#rrggbb"` colours; shading is added automatically.
+2. Register it in `src/characters/index.ts`.
+3. Add `"owl"` to the `waterReminder.character` enum (and its label) in `package.json`.
+
+Every animation works with the new character automatically.
 
 ## Manual test checklist (Windows 10/11, macOS Intel / Apple Silicon)
 
 | # | Check | Expected |
 |---|---|---|
-| 1 | Test Reminder with each of the 5 entry animations | Smooth entry, then speech bubble |
-| 2 | Slide | Character slips in leaning back with arms flailing, overbalances, wobbles and recovers; on exit its feet slip and it slides away backwards |
-| 2b | Sprout | Cracks and a dirt mound appear, a leaf pokes out, the character pushes up in stages, dirt flies, the leaf drops off |
-| 3 | Acknowledge after sprout | Happy hops, "Yay!", then it burrows back down and the mound disappears |
-| 4 | Each of the 6 characters | Looks right in a light and a dark theme |
-| 5 | Size small / large, speed slow / fast | Scales and timing change |
-| 6 | Type, click and scroll while visible | Editor behaves normally; character stays at the bottom |
-| 7 | Split the editor and click the other group | Character moves to the active editor |
-| 8 | Resize the window / drag the panel | Character stays in the corner |
-| 9 | Set Interval → Custom → 1; wait | Reminder appears after 1 minute; countdown restarts only after it leaves |
-| 10 | Pause, wait, Resume | Remaining time is kept |
-| 11 | Developer: Reload Window mid-countdown | Countdown continues, not restarted |
-| 12 | Close all editors when a reminder is due | Appears when you next open a text file |
-| 13 | Custom `messages` | Only your messages are used |
-| 14 | Help → Open Process Explorer while idle | Extension host CPU stays at ~0% |
+| 1 | **Preview Character** with each of the 10 styles | Smooth entry, then speech bubble; ground shadow under the character |
+| 2 | Each of the 10 characters, light and dark theme | Shaded, rounded look; nothing missing |
+| 3 | **Test Reminder** several times with Random | A different style each time |
+| 4 | **Change Animation** → Slide, then Test Reminder several times | Always slides |
+| 5 | Test Reminder, then wait a minute without clicking | Character stays; idles for ~30 s, then a small move about every 30 s |
+| 6 | Switch to another app and back while it waits | It waves or hops when you return |
+| 7 | **I've had a drink!** | Cheer message, happy hops, leaves in the matching style |
+| 8 | Turn on Auto Close, Test Reminder | Leaves by itself after Display Seconds |
+| 9 | Sound on | Chime on arrival and when it starts leaving; none when Sound is off |
+| 9b | **Change Sound**, pick each style | The picked sound plays once and is used for the next reminder |
+| 10 | Set interval to 1 minute, switch to another app, wait | System notification appears; character is waiting in VS Code when you come back |
+| 11 | Same, but stay in VS Code | No system notification; character appears |
+| 12 | Two VS Code windows, 1-minute interval | One reminder, in the window in front; after answering, the other window shows nothing and both countdowns restart together |
+| 13 | Two windows: Pause in one | Both show "paused"; Resume restores both |
+| 14 | Type, click and scroll while the character is visible | Editor behaves normally; character stays at the bottom |
+| 15 | Developer: Reload Window mid-countdown | Countdown continues |
+| 16 | Close all editors when a reminder is due | Appears when you next open a text file |
+| 17 | Save some settings (character, interval) with the previous version, then run this version for the first time | A notice says settings were reset; all Water Reminder settings are back to default; it does not happen again on the next start |
+| 18 | Help → Open Process Explorer while a character has been waiting for over a minute | Extension host and window CPU near 0% between nudges |
 
-## Adding a character
-
-1. Copy `src/characters/bear.ts` to `src/characters/fox.ts` and edit the colours, ears and face.
-2. Register it in `src/characters/index.ts`.
-3. Add `"fox"` to the `waterReminder.character` enum in `package.json`.
-
-Every animation works with the new character automatically.
-
-## Project layout
-
-```
-src/extension.ts          commands, settings, status bar, timer wiring
-src/timer.ts              countdown logic (no VS Code dependency)
-src/config.ts             settings validation, messages
-src/presenter.ts          puts the character in the editor (decorations)
-src/render/stage.ts       animation engine: builds the self-animating SVG
-src/render/animations.ts  animation names, durations, speed and size tables
-src/characters/           one file per animal + shared body rig
-src/test/                 unit tests (node:test)
-```
+Notes for checks 9 and 10 on Windows: both go through `powershell.exe`. The sound may start up to a second after the character appears. The notification is labelled "Windows PowerShell". On a locked-down machine PowerShell may be restricted, in which case there is no sound or notification but everything else works.

@@ -3,8 +3,12 @@ import { CharacterDef } from './types';
 /**
  * Shared "little human" body rig. Local coordinates: feet at y=0, facing right.
  * The animation engine only knows these class names:
- *   leg-a leg-b arm-a arm-b head ear eyes leaf
+ *   leg-a leg-b arm-a arm-b head ear eyes leaf   (movable parts)
+ *   pb pf                                        (back / front depth layers of the head)
  * so any character drawn through this rig works with every animation.
+ *
+ * Shapes are drawn with flat fills. stage.ts turns every fill into a lit,
+ * rounded-looking gradient, so new characters get the 3D look for free.
  */
 export const INK = '#2B3A55';
 export const PINK = '#F7B6C8';
@@ -23,29 +27,33 @@ export function cheeks(): string {
 export function drawCharacter(c: CharacterDef, happy: boolean, withLeaf: boolean): string {
   const limb = c.limb ?? c.skin;
   const limbShade = c.limbShade ?? c.shade;
+  const leg = c.leg ?? limbShade;
   const leaf = withLeaf
     ? `<g class="leaf"><path d="M2,-145 v-16" stroke="#4E9F3D" stroke-width="3" stroke-linecap="round"/>
        <path d="M2,-160 q-16,-14 -24,-2 q12,10 24,2z" fill="#6BCB77"/><path d="M2,-160 q14,-16 24,-6 q-10,12 -24,6z" fill="#4E9F3D"/></g>`
     : '';
   return `
   ${c.tail ?? ''}
-  <rect class="limb leg-a" x="-22" y="-38" width="18" height="38" rx="8" fill="${limbShade}"/>
-  <rect class="limb leg-b" x="4" y="-38" width="18" height="38" rx="8" fill="${limbShade}"/>
+  <rect class="limb leg-a" x="-22" y="-38" width="18" height="38" rx="8" fill="${leg}"/>
+  <rect class="limb leg-b" x="4" y="-38" width="18" height="38" rx="8" fill="${leg}"/>
   <rect class="limb arm-a" x="-39" y="-76" width="14" height="34" rx="7" fill="${limbShade}"/>
   <rect x="-28" y="-82" width="56" height="56" rx="22" fill="${c.skin}" stroke="${c.shade}" stroke-width="1.5"/>
+  ${c.belly ?? ''}
   <path d="M-27,-58 h54 v12 a20,20 0 0 1 -20,18 h-14 a20,20 0 0 1 -20,-18 z" fill="${c.outfit}"/>
   <rect x="-20" y="-74" width="7" height="18" fill="${c.outfit}"/><rect x="13" y="-74" width="7" height="18" fill="${c.outfit}"/>
   <rect x="-8" y="-52" width="16" height="11" rx="3" fill="${c.outfitLight}"/>
+  <ellipse cx="2" cy="-67" rx="25" ry="8" fill="url(#chin)"/>
   <g class="limb arm-b">
     <rect x="25" y="-76" width="14" height="34" rx="7" fill="${limb}" stroke="${c.shade}" stroke-width="1"/>
     <rect x="27" y="-52" width="15" height="19" rx="3" fill="#E8F7FF" stroke="#5BB8E8" stroke-width="1.5"/>
     <rect x="28.5" y="-45" width="12" height="10.5" rx="2" fill="#5BB8E8"/>
+    <rect x="29" y="-50" width="2.5" height="14" rx="1.2" fill="#fff" opacity=".7"/>
   </g>
   <g class="head">
-    ${c.ears}
+    <g class="pb">${c.ears}</g>
     <circle cx="2" cy="-108" r="40" fill="${c.skin}" stroke="${c.shade}" stroke-width="1.5"/>
-    ${c.face(happy)}
-    ${c.earsFront ?? ''}
+    <ellipse cx="-12" cy="-128" rx="20" ry="12" fill="url(#hl)" transform="rotate(-28 -12 -128)"/>
+    <g class="pf">${c.face(happy)}${c.earsFront ?? ''}</g>
     ${leaf}
   </g>`;
 }
