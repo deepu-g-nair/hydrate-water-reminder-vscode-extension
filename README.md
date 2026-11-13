@@ -1,6 +1,8 @@
 # Hydrate: Animated Water Reminder
 
-A little animal friend visits your editor to remind you to drink water.
+A **Visual Studio Code extension** in which a little animal friend visits your editor to remind you to drink water.
+
+**[Get it on the VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=deepugnair.hydrate-reminder-animated)**
 
 Instead of a plain notification, a cute 3D-style character rolls, floats, bounces or sprouts out of the ground right inside your code editor, holds up a glass of water, and waits until you have had a sip. You can keep typing the whole time.
 
@@ -16,6 +18,36 @@ Instead of a plain notification, a cute 3D-style character rolls, floats, bounce
 - **Friendly messages:** 20 reminders and 15 cheers, some of them a bit sarcastic. Or write your own.
 - **Your schedule:** every 15, 30, 45, 60 or 90 minutes, or any interval you like.
 - **Stays out of your way:** clicks pass straight through the character to your code.
+
+## Install
+
+You need [Visual Studio Code](https://code.visualstudio.com/) on Windows, macOS or Linux.
+
+**From inside VS Code (easiest)**
+
+1. Open VS Code.
+2. Open the Extensions view: click the Extensions icon in the left bar, or press `Ctrl+Shift+X` (Mac: `Cmd+Shift+X`).
+3. Search for **Hydrate: Animated Water Reminder**.
+4. Click **Install**.
+
+**From the Marketplace website**
+
+1. Open the [Hydrate page on the VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=deepugnair.hydrate-reminder-animated).
+2. Click **Install**. Your browser asks to open VS Code; allow it, then click **Install** in VS Code.
+
+**From the command line**
+
+```
+code --install-extension deepugnair.hydrate-reminder-animated
+```
+
+**From a `.vsix` file** (for example, one attached to a GitHub release)
+
+1. Download the `.vsix` file.
+2. In VS Code, open the Extensions view, click the `…` menu at the top, and choose **Install from VSIX…**.
+3. Pick the downloaded file.
+
+Updates install automatically when you install from the Marketplace.
 
 ## Getting started
 
